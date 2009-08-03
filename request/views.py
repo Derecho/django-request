@@ -42,6 +42,7 @@ def overview(request):
         'top_paths': Request.objects.paths(count=True, limit=10, qs=Request.objects.filter(response__lt=400)),
         'top_error_paths': Request.objects.paths(count=True, limit=10, qs=(Request.objects.filter(response__gte=400))),
         'top_referrers': Request.objects.referrers(count=True, limit=10, qs=Request.objects.exclude(referer__startswith=settings.REQUEST_BASE_URL).exclude(referer='')),
+        'top_keywords': Request.objects.keywords(count=True, limit=10),
         
         'requests_url': '/admin/request/request/',
         'use_hosted_media': settings.REQUEST_USE_HOSTED_MEDIA

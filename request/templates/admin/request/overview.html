@@ -167,5 +167,21 @@ $(document).ready(function(){
       </table>
     </div>
 
+    <div class="module" style="float: left; margin-left: 16px; width: 450px;">
+        <table summary="{% trans "Top search engine keywords" %}" style="width: 100%;">
+            <caption>{% trans "Top search engine keywords" %}</caption>
+            <tr>
+                <th>{% trans "Keywords" %}</th>
+                <th>{% trans "Hits" %}</th>
+            </tr>
+          {% for keywords,hits in top_keywords %}
+            <tr>
+                <td>{{ keywords }}</a></td>
+                <td>{{ hits }}</td>
+            </tr>
+          {% endfor %}
+      </table>
+    </div>
+
 </div>
 {% endblock %}

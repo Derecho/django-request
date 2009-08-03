@@ -1,4 +1,5 @@
 import datetime, time
+from urlparse import urlparse
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -79,6 +80,57 @@ class RequestManager(models.Manager):
             referers = referers[:limit]
         
         return referers
+    
+    def keywords(self, unique=True, count=False, qs=None, limit=None):
+        # Currently supported search engines:
+        # - Google
+        
+        # We will narrow down the queryset with referrers from supported search engines only
+        if not qs:
+            qs = self.all()
+        qs = qs.filter(referer__startswith='http://google')|qs.filter(referer__startswith='http://www.google')
+        
+        # Now get the a list of the 'top referrers' for those
+        urls = self.referrers(unique, count, qs, limit)
+        
+        # Parse the keywords in the urls
+        searchengine = None
+        keywords = []
+        
+        if count:
+            for k, v in urls:
+                # Determine search engine
+                if len(k) > 18:
+                    if k[:13] == "http://google" or k[:17] == "http://www.google":
+                        searchengine = "Google"
+                elif len(k) > 14:
+                    if k[:13] == "http://google":
+                        searchengine = "Google"
+                
+                # Get keywords
+                if searchengine == "Google":
+                    k = dict([part.split('=',1) for part in urlparse(k)[4].split('&')])['q'].replace('+', ' ')
+                    keywords.append((v, k))
+            keywords.sort()
+            keywords.reverse()
+            keywords = [(k, v) for v, k in keywords]
+            
+        else:
+            for url in urls:
+                # Determine search engine
+                if len(url) > 18:
+                    if url[:13] == "http://google" or url[:17] == "http://www.google":
+                        searchengine = "Google"
+                elif len(url) > 14:
+                    if url[:13] == "http://google":
+                        searchengine = "Google"
+                
+                # Get keywords
+                if searchengine == "Google":
+                    url = dict([part.split('=',1) for part in urlparse(url)[4].split('&')])['q'].replace('+', ' ')
+                    keywords.append(url)
+        
+        return keywords
     
     def year(self, year):
         return self.filter(time__year=year)
